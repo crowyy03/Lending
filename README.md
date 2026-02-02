@@ -1,20 +1,17 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AlexPRO Lights — лендинг
 
-# Run and deploy your AI Studio app
+Лендинг постоянного наружного освещения (Los Angeles). Заявки уходят в Google Sheets через Google Apps Script.
 
-This contains everything you need to run your app locally.
+## Локальный запуск
 
-View your app in AI Studio: https://ai.studio/apps/drive/1OR8WCEgUgP7qQDbWQKT3TJNJLIgY5ZT1
+1. `npm install`
+2. Создай `.env.local` и добавь URL веб-приложения Apps Script (см. [docs/GOOGLE_SHEETS_SETUP.md](docs/GOOGLE_SHEETS_SETUP.md)):
+   ```
+   VITE_GOOGLE_SCRIPT_URL=https://script.google.com/macros/s/.../exec
+   ```
+3. `npm run dev`
 
-## Run Locally
+## Деплой на Vercel
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- В настройках проекта Vercel добавь переменную окружения **VITE_GOOGLE_SCRIPT_URL** (URL веб-приложения Google Apps Script).
+- Сборка: `npm run build`, выход: `dist`.

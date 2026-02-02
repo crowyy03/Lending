@@ -53,10 +53,26 @@ export const MultiStepForm: React.FC = () => {
     if (!formData.email) return alert('Please enter your email.');
     
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL as string | undefined;
+
+    try {
+      if (scriptUrl) {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      setIsSuccess(true);
+    } catch (err) {
+      if (scriptUrl) alert('Something went wrong. Please try again or contact us directly.');
+      else setIsSuccess(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
