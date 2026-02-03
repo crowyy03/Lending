@@ -4,7 +4,7 @@ import { Check, ArrowRight, Loader2, MapPin, Phone, Mail, Home, MessageSquare } 
 interface FormData {
   address: string;
   phone: string;
-  contactMethod: 'call' | 'whatsapp';
+  contactMethods: string[];
   coverage: string;
   homeHeight: string;
   mainUse: string;
@@ -20,7 +20,7 @@ export const MultiStepForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     address: '',
     phone: '',
-    contactMethod: 'whatsapp',
+    contactMethods: ['call', 'whatsapp'],
     coverage: '',
     homeHeight: '',
     mainUse: '',
@@ -37,10 +37,22 @@ export const MultiStepForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const toggleContactMethod = (method: string) => {
+    setFormData(prev => {
+      const exists = prev.contactMethods.includes(method);
+      if (exists) {
+        return { ...prev, contactMethods: prev.contactMethods.filter(m => m !== method) };
+      } else {
+        return { ...prev, contactMethods: [...prev.contactMethods, method] };
+      }
+    });
+  };
+
   const nextStep = () => {
     // Simple validation
     if (step === 1) {
       if (!formData.address || !formData.phone) return alert('Please fill in your address and phone number.');
+      if (formData.contactMethods.length === 0) return alert('Please select at least one contact method.');
     }
     if (step === 2) {
       if (!formData.coverage || !formData.homeHeight || !formData.mainUse) return alert('Please select an option for each question.');
@@ -53,29 +65,17 @@ export const MultiStepForm: React.FC = () => {
     if (!formData.email) return alert('Please enter your email.');
     
     setIsSubmitting(true);
-    const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL as string | undefined;
-
-    try {
-      if (scriptUrl) {
-        await fetch(scriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
-      setIsSuccess(true);
-    } catch (err) {
-      if (scriptUrl) alert('Something went wrong. Please try again or contact us directly.');
-      else setIsSuccess(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(false);
+    setIsSuccess(true);
   };
 
   if (isSuccess) {
+    const methodsDisplay = formData.contactMethods
+      .map(m => m === 'call' ? 'Phone Call' : 'WhatsApp')
+      .join(' or ');
+
     return (
       <div className="glass-panel p-8 rounded-2xl text-center max-w-lg mx-auto border border-brand-cyan/30 shadow-[0_0_50px_-12px_rgba(34,211,238,0.2)]">
         <div className="w-16 h-16 bg-brand-cyan/20 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-cyan">
@@ -83,7 +83,7 @@ export const MultiStepForm: React.FC = () => {
         </div>
         <h3 className="text-2xl font-bold text-white mb-4">Got it — next step is a quick confirmation</h3>
         <p className="text-gray-300 mb-8 leading-relaxed">
-          We’ll preview your roofline on maps and reach out via your chosen method ({formData.contactMethod === 'call' ? 'Phone Call' : 'WhatsApp'}). 
+          We’ll preview your roofline on maps and reach out via your chosen method ({methodsDisplay}). 
           After a short 10–15 min confirmation, we’ll email your personalized estimate.
         </p>
         <button 
@@ -151,30 +151,44 @@ export const MultiStepForm: React.FC = () => {
 
                 <div>
                   <label className="block text-gray-400 text-sm mb-3">Preferred Contact Method</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => handleSelection('contactMethod', 'call')}
-                      className={`py-3 px-4 rounded-lg border flex items-center justify-center gap-2 transition-all ${
-                        formData.contactMethod === 'call' 
-                          ? 'bg-brand-cyan/20 border-brand-cyan text-brand-cyan' 
+                  <div className="space-y-3">
+                    {/* Call Checkbox */}
+                    <div 
+                      onClick={() => toggleContactMethod('call')}
+                      className={`flex items-center p-4 rounded-lg border cursor-pointer transition-all ${
+                        formData.contactMethods.includes('call') 
+                          ? 'bg-brand-cyan/20 border-brand-cyan text-white' 
                           : 'bg-brand-navy/30 border-gray-700 text-gray-400 hover:border-gray-500'
                       }`}
                     >
-                      <Phone size={18} /> Call
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSelection('contactMethod', 'whatsapp')}
-                      className={`py-3 px-4 rounded-lg border flex items-center justify-center gap-2 transition-all ${
-                        formData.contactMethod === 'whatsapp' 
-                          ? 'bg-brand-cyan/20 border-brand-cyan text-brand-cyan' 
+                      <div className={`w-6 h-6 rounded flex items-center justify-center border mr-4 transition-colors ${
+                        formData.contactMethods.includes('call') ? 'bg-brand-cyan border-brand-cyan text-brand-dark' : 'border-gray-600 bg-transparent'
+                      }`}>
+                        {formData.contactMethods.includes('call') && <Check size={16} strokeWidth={3} />}
+                      </div>
+                      <Phone size={20} className="mr-3 text-brand-cyan" />
+                      <span className="font-medium">Phone Call</span>
+                    </div>
+
+                    {/* WhatsApp Checkbox */}
+                    <div 
+                      onClick={() => toggleContactMethod('whatsapp')}
+                      className={`flex items-center p-4 rounded-lg border cursor-pointer transition-all ${
+                        formData.contactMethods.includes('whatsapp') 
+                          ? 'bg-brand-cyan/20 border-brand-cyan text-white' 
                           : 'bg-brand-navy/30 border-gray-700 text-gray-400 hover:border-gray-500'
                       }`}
                     >
-                      <MessageSquare size={18} /> WhatsApp
-                    </button>
+                      <div className={`w-6 h-6 rounded flex items-center justify-center border mr-4 transition-colors ${
+                        formData.contactMethods.includes('whatsapp') ? 'bg-brand-cyan border-brand-cyan text-brand-dark' : 'border-gray-600 bg-transparent'
+                      }`}>
+                        {formData.contactMethods.includes('whatsapp') && <Check size={16} strokeWidth={3} />}
+                      </div>
+                      <MessageSquare size={20} className="mr-3 text-brand-cyan" />
+                      <span className="font-medium">WhatsApp</span>
+                    </div>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">Uncheck if you prefer not to be contacted via a specific method.</p>
                 </div>
 
                 <div className="pt-4">

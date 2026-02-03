@@ -1,17 +1,17 @@
 # AlexPRO Lights — лендинг
 
-Лендинг постоянного наружного освещения (Los Angeles). Заявки уходят в Google Sheets через Google Apps Script.
+Лендинг постоянного наружного освещения (Los Angeles). Заявки с формы уходят в **AmoCRM** (сделка + контакт) через API на Vercel.
 
 ## Локальный запуск
 
 1. `npm install`
-2. Создай `.env.local` и добавь URL веб-приложения Apps Script (см. [docs/GOOGLE_SHEETS_SETUP.md](docs/GOOGLE_SHEETS_SETUP.md)):
-   ```
-   VITE_GOOGLE_SCRIPT_URL=https://script.google.com/macros/s/.../exec
-   ```
-3. `npm run dev`
+2. `npm run dev` — фронт на http://localhost:3000  
+   Маршрут `/api/lead` работает только на Vercel (или при `vercel dev`). Чтобы проверить отправку в AmoCRM — деплой на Vercel или запуск `vercel dev`.
 
 ## Деплой на Vercel
 
-- В настройках проекта Vercel добавь переменную окружения **VITE_GOOGLE_SCRIPT_URL** (URL веб-приложения Google Apps Script).
-- Сборка: `npm run build`, выход: `dist`.
+- Сборка: `npm run build`, выход: `dist`. API: папка `api/` (serverless).
+- В настройках проекта добавь переменные окружения для AmoCRM (см. [docs/AMOCRM_SETUP.md](docs/AMOCRM_SETUP.md)):
+  - **AMOCRM_SUBDOMAIN** — поддомен AmoCRM
+  - **AMOCRM_ACCESS_TOKEN** — токен доступа API
+  - по желанию: `AMOCRM_PIPELINE_ID`, `AMOCRM_STATUS_ID`, `AMOCRM_FIELD_LEAD_NOTES`
